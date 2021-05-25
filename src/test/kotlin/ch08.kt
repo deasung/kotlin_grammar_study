@@ -1,3 +1,4 @@
+import com.google.gson.Gson
 import kotlin.properties.Delegates
 
 import org.junit.jupiter.api.Test
@@ -131,6 +132,15 @@ var checked: Int by Delegates.vetoable(0) {
 //
 //}
 
+
+data class Project(val map: MutableMap<String, Any?>) {
+    val name: String by map
+    var priority: Int by map
+    var completed: Boolean by map
+}
+
+
+
 class Chapter08 {
 
 
@@ -157,4 +167,62 @@ class Chapter08 {
 
     }
 
+    //대리자로서 Map 제공
+    //문제 여러 값이 들어 있는 맵(map)을 제공해 객체를 초기화하고 싶음
+    //해법 코틀린 맵에는 대리자가 되는 데 필요한 getValue와 setValue 함수 구현이 있음
+
+    //예제 8-17 맵으로 Project 인스턴스 생성하기
+    @Test
+    fun `use map delegate for Project`() {
+
+        val project = Project(
+            mutableMapOf(
+
+                "name" to "Learn Kotlin",
+                "priority" to 5,
+                "completed" to true
+
+
+            )
+        )
+
+        assertAll(
+            { assertEquals("Learn Kotlin", project.name) },
+            { assertEquals(5, project.priority) },
+            { assertTrue(project.completed) }
+        )
+
+    }
+
+    private fun getMapFromJSON() =
+        Gson().fromJson<MutableMap<String, Any?>>(
+            """{ "name":"Learn Kotlin", "priority":5, "completed":true}""",
+            MutableMap::class.java
+        )
+
+
+    @Test
+    fun `create project from map parsed from JSON string`() {
+
+        val project = Project(getMapFromJSON())
+        assertAll(
+            { assertEquals("Learn Kotlin", project.name )},
+            { assertEquals(5, project.priority)},
+            { assertTrue(project.completed) }
+        )
+
+    }
+
+
+    @Test
+    fun `todo test`() {
+
+        val exception = assertThrows<NotImplementedError> {
+            TODO("seriously, finish this")
+        }
+
+        assertEquals("An operation is not implemented: seriously, finish this",
+        exception.message)
+
+    }
 }
